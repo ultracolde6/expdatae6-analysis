@@ -27,7 +27,8 @@ run_doc_string = ('molasses freq = [4, 4, 4.5, 5, 5.5, 6, 6.25, 6.5, 6.75, 7, 7.
 
 # datamodel = get_datamodel(daily_path=daily_path, run_name=run_name, num_points=num_points,
 #                           run_doc_string=run_doc_string, quiet=False)
-datamodel = DataModel(run_name=run_name, num_points=num_points,run_doc_string=run_doc_string)
+datamodel = DataModel(run_name=run_name, num_points=num_points,
+                      run_doc_string=run_doc_string)
 
 datafield_list = []
 processor_list = []
@@ -75,25 +76,25 @@ for frame_num in range(num_frames):
         for point_num in range(num_points):
             roi_array[point_num, tweezer_num] = tweezer_roi
         new_counts_datafield = DataDictShotDataField(name=f'{frame_key}_tweezer-{tweezer_num:02d}_counts')
-        new_counts_threshold_datafield = DataDictShotDataField(name=f'{frame_key}_tweezer-{tweezer_num:02d}_counts_verifier')
         datafield_list.append(new_counts_datafield)
-        datafield_list.append(new_counts_threshold_datafield)
         multicounts_result_datafield_name_list.append(new_counts_datafield.name)
-        threshold_processor = ThresholdProcessor(name=f'{frame_key}_tweezer-{tweezer_num:02d}_threshold_processor',
-                                                 input_datafield_name=f'{frame_key}_tweezer-{tweezer_num:02d}_counts',
-                                                 output_datafield_name=f'{frame_key}_tweezer-{tweezer_num:02d}_counts_verifier',
-                                                 threshold_value=31000)
-        threshold_processor_list.append(threshold_processor)
+        # new_counts_threshold_datafield = DataDictShotDataField(name=f'{frame_key}_tweezer-{tweezer_num:02d}_counts_verifier')
+        # datafield_list.append(new_counts_threshold_datafield)
+        # threshold_processor = ThresholdProcessor(name=f'{frame_key}_tweezer-{tweezer_num:02d}_threshold_processor',
+        #                                          input_datafield_name=f'{frame_key}_tweezer-{tweezer_num:02d}_counts',
+        #                                          output_datafield_name=f'{frame_key}_tweezer-{tweezer_num:02d}_counts_verifier',
+        #                                          threshold_value=31000)
+        # threshold_processor_list.append(threshold_processor)
     counts_plot_reporter = PlotPointReporter(name=f'{frame_key}_counts_reporter',
                                              datafield_name_list=multicounts_result_datafield_name_list,
                                              layout=Reporter.LAYOUT_GRID, save_data=True)
-    reporter_list.append(counts_plot_reporter)
+    # reporter_list.append(counts_plot_reporter)
     multicounts_processor = MultiCountsProcessor(name=f'{frame_key}_multicount_processor',
                                                  frame_datafield_name=frame_key,
                                                  result_datafield_name_list=multicounts_result_datafield_name_list,
                                                  roi_slice_array=roi_array)
     processor_list.append(multicounts_processor)
-    processor_list += threshold_processor_list
+    # processor_list += threshold_processor_list
 
 reporter_roi_dict = dict()
 for frame_num in range(num_frames):
@@ -115,5 +116,5 @@ for datatool in datatool_list:
     datamodel.add_datatool(datatool, overwrite=True, quiet=True)
 datamodel.link_datatools()
 
-datamodel.run(handler_quiet=True,save_every_shot=False)
+datamodel.run_continuously(handler_quiet=True,save_every_shot=False)
 
