@@ -1,7 +1,7 @@
 import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
-from e6dataflow.datamodel import DataModel
+from e6dataflow.datamodel import get_datamodel, DataModel
 from e6dataflow.datastream import DataStream
 from e6dataflow.aggregator import AvgStdAggregator
 from e6dataflow.datafield import DataStreamDataField, DataDictShotDataField, DataDictPointDataField
@@ -25,10 +25,10 @@ run_doc_string = ('molasses freq = [4, 4, 4.5, 5, 5.5, 6, 6.25, 6.5, 6.75, 7, 7.
                  't_exposure = 500 ms , t_hold = 100 ms'
                  'photoassociation -  drop cavity ODT - hold - load cavity ODT ')
 
-# datamodel = get_datamodel(daily_path=daily_path, run_name=run_name, num_points=num_points,
-#                           run_doc_string=run_doc_string, quiet=False)
-datamodel = DataModel(run_name=run_name, num_points=num_points,
-                      run_doc_string=run_doc_string)
+datamodel = get_datamodel(run_name=run_name, num_points=num_points,
+                          run_doc_string=run_doc_string)
+# datamodel = DataModel(run_name=run_name, num_points=num_points,
+#                       run_doc_string=run_doc_string)
 
 datafield_list = []
 processor_list = []
@@ -78,23 +78,16 @@ for frame_num in range(num_frames):
         new_counts_datafield = DataDictShotDataField(name=f'{frame_key}_tweezer-{tweezer_num:02d}_counts')
         datafield_list.append(new_counts_datafield)
         multicounts_result_datafield_name_list.append(new_counts_datafield.name)
-        # new_counts_threshold_datafield = DataDictShotDataField(name=f'{frame_key}_tweezer-{tweezer_num:02d}_counts_verifier')
-        # datafield_list.append(new_counts_threshold_datafield)
-        # threshold_processor = ThresholdProcessor(name=f'{frame_key}_tweezer-{tweezer_num:02d}_threshold_processor',
-        #                                          input_datafield_name=f'{frame_key}_tweezer-{tweezer_num:02d}_counts',
-        #                                          output_datafield_name=f'{frame_key}_tweezer-{tweezer_num:02d}_counts_verifier',
-        #                                          threshold_value=31000)
-        # threshold_processor_list.append(threshold_processor)
+
     counts_plot_reporter = PlotPointReporter(name=f'{frame_key}_counts_reporter',
                                              datafield_name_list=multicounts_result_datafield_name_list,
-                                             layout=Reporter.LAYOUT_GRID, save_data=True)
-    # reporter_list.append(counts_plot_reporter)
+                                             layout=Reporter.LAYOUT_GRID, save_data=True, close_plots=True)
+    reporter_list.append(counts_plot_reporter)
     multicounts_processor = MultiCountsProcessor(name=f'{frame_key}_multicount_processor',
                                                  frame_datafield_name=frame_key,
                                                  result_datafield_name_list=multicounts_result_datafield_name_list,
                                                  roi_slice_array=roi_array)
     processor_list.append(multicounts_processor)
-    # processor_list += threshold_processor_list
 
 reporter_roi_dict = dict()
 for frame_num in range(num_frames):
@@ -106,15 +99,14 @@ avg_img_datafield_name_list = [f'frame-{frame_num:02d}_avg' for frame_num in ran
 image_point_reporter = ImagePointReporter(name='avg_frame_reporter',
                                           datafield_name_list=avg_img_datafield_name_list,
                                           layout=Reporter.LAYOUT_HORIZONTAL,
-                                          save_data=True, roi_dict=reporter_roi_dict)
+                                          save_data=True, close_plots=True, roi_dict=reporter_roi_dict)
 
 datastream_list = [high_na_datastream]
 reporter_list += [image_point_reporter]
-# reporter_list = []
 datatool_list = datastream_list + datafield_list + processor_list + aggregator_list + reporter_list
 for datatool in datatool_list:
     datamodel.add_datatool(datatool, overwrite=True, quiet=True)
 datamodel.link_datatools()
 
-datamodel.run_continuously(handler_quiet=True,save_every_shot=False)
+datamodel.run(handler_quiet=True,save_every_shot=False)
 
