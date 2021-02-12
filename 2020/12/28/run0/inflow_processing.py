@@ -25,10 +25,10 @@ run_doc_string = ('molasses freq = [4, 4, 4.5, 5, 5.5, 6, 6.25, 6.5, 6.75, 7, 7.
                  't_exposure = 500 ms , t_hold = 100 ms'
                  'photoassociation -  drop cavity ODT - hold - load cavity ODT ')
 
-datamodel = get_datamodel(run_name=run_name, num_points=num_points,
-                          run_doc_string=run_doc_string)
-# datamodel = DataModel(run_name=run_name, num_points=num_points,
-#                       run_doc_string=run_doc_string)
+# datamodel = get_datamodel(run_name=run_name, num_points=num_points,
+#                           run_doc_string=run_doc_string)
+datamodel = DataModel(run_name=run_name, num_points=num_points,
+                      run_doc_string=run_doc_string)
 
 datafield_list = []
 processor_list = []
