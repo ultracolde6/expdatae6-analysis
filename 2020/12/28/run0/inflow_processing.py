@@ -89,17 +89,16 @@ for frame_num in range(num_frames):
                                                  roi_slice_array=roi_array)
     processor_list.append(multicounts_processor)
 
-reporter_roi_dict = dict()
-for frame_num in range(num_frames):
-    datafield_name = f'frame-{frame_num:02d}_avg'
-    reporter_roi_dict[datafield_name] = tweezer_roi_list
+# reporter_roi_dict = dict()
+# for frame_num in range(num_frames):
+#     datafield_name = f'frame-{frame_num:02d}_avg'
+#     reporter_roi_dict[datafield_name] = tweezer_roi_list
 
-roi_dict = {'frame-00_avg':[(slice(45, 65), slice(5, 25))]}
 avg_img_datafield_name_list = [f'frame-{frame_num:02d}_avg' for frame_num in range(num_frames)]
 image_point_reporter = ImagePointReporter(name='avg_frame_reporter',
                                           datafield_name_list=avg_img_datafield_name_list,
                                           layout=Reporter.LAYOUT_HORIZONTAL,
-                                          save_data=True, close_plots=True, roi_dict=reporter_roi_dict)
+                                          save_data=True, close_plots=True, roi_slice_array=roi_array)
 
 datastream_list = [high_na_datastream]
 reporter_list += [image_point_reporter]
