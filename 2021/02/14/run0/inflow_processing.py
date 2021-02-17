@@ -25,11 +25,11 @@ run_doc_string = ('molasses freq = [4.5,5,5.5,6,6.5,7,7.5,8]'
                   'pzt_para_list = [5.5,6,6.5,7,7.5,8,8.5,9,9.5,10]'
                  't_exposure = 500 ms , t_hold = 100 ms'
                  'photoassociation -  drop cavity ODT - hold - load cavity ODT ')
-
-datamodel = get_datamodel(run_name=run_name, num_points=num_points,
-                          run_doc_string=run_doc_string)
-# datamodel = DataModel(run_name=run_name, num_points=num_points,
-#                       run_doc_string=run_doc_string)
+#
+# datamodel = get_datamodel(run_name=run_name, num_points=num_points,
+#                           run_doc_string=run_doc_string)
+datamodel = DataModel(run_name=run_name, num_points=num_points,
+                      run_doc_string=run_doc_string)
 
 datafield_list = []
 processor_list = []
@@ -85,7 +85,7 @@ for frame_num in range(num_frames):
     counts_plot_reporter = PlotPointReporter(name=f'{frame_key}_counts_reporter',
                                              datafield_name_list=multicounts_result_datafield_name_list,
                                              layout=Reporter.LAYOUT_GRID, save_data=True, close_plots=True)
-    reporter_list.append(counts_plot_reporter)
+    # reporter_list.append(counts_plot_reporter)
     multicounts_processor = MultiCountsProcessor(name=f'{frame_key}_multicount_processor',
                                                  frame_datafield_name=frame_key,
                                                  result_datafield_name_list=multicounts_result_datafield_name_list,
@@ -96,12 +96,13 @@ for frame_num in range(num_frames):
 avg_img_datafield_name_list = [f'frame-{frame_num:02d}_avg' for frame_num in range(num_frames)]
 image_point_reporter = ImagePointReporter(name='avg_frame_reporter',
                                           datafield_name_list=avg_img_datafield_name_list,
-                                          layout=Reporter.LAYOUT_HORIZONTAL,
-                                          save_data=True, close_plots=False, roi_slice_array=roi_array)
+                                          layout=Reporter.LAYOUT_GRID,
+                                          save_data=True, close_plots=True, roi_slice_array=roi_array)
 
 datastream_list = [high_na_datastream]
 reporter_list += [image_point_reporter]
 datatool_list = datastream_list + datafield_list + processor_list + aggregator_list + reporter_list
+# datatool_list = reporter_list
 for datatool in datatool_list:
     datamodel.add_datatool(datatool, overwrite=True, quiet=True)
 datamodel.link_datatools()
