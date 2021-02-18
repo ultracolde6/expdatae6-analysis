@@ -88,10 +88,6 @@ for frame_num in range(num_frames):
                                                  roi_slice_array=roi_array)
     processor_list.append(multicounts_processor)
 
-# reporter_roi_dict = dict()
-# for frame_num in range(num_frames):
-#     datafield_name = f'frame-{frame_num:02d}_avg'
-#     reporter_roi_dict[datafield_name] = tweezer_roi_list
 
 avg_img_datafield_name_list = [f'frame-{frame_num:02d}_avg' for frame_num in range(num_frames)]
 image_point_reporter = ImagePointReporter(name='avg_frame_reporter',
