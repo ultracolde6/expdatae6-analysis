@@ -39,15 +39,15 @@ reporter_list = []
 high_na_datastream = DataStream(name='high NA Imaging', daily_path=daily_path, run_name=run_name,
                                 file_prefix='jkam_capture')
 
-tweezer_00_vert_center = 81.15
+tweezer_00_vert_center = 81.15 # starting position of tweezer 0 = 108MHz
 tweezer_00_horiz_center = 18.2
 tweezer_horiz_span = 14
 tweezer_vert_span = 12
 
-tweezer_vert_spacing = 27.8*2
+tweezer_vert_spacing = 27.8*2 #2 is freq diff between neighboring tweezers on this run
 tweezer_horiz_spacing = 1.3867*2
 
-piezo_vert_shift = 0.3*0.5
+piezo_vert_shift = 0.3*0.5  #0.5 is step size of pzt_para_list on this run
 piezo_horiz_shift = 1.4*0.5
 
 num_tweezers = 5
@@ -69,13 +69,16 @@ for frame_num in range(num_frames):
 
     roi_array = np.zeros([num_points, num_tweezers], dtype=object)
     multicounts_result_datafield_name_list = []
+
     for tweezer_num in range(num_tweezers):
         for point_num in range(num_points):
+            v_center = tweezer_00_vert_center + tweezer_num * tweezer_vert_spacing \
+                                              + point_num//4*piezo_vert_shift
+            h_center = tweezer_00_horiz_center + tweezer_num * tweezer_horiz_spacing \
+                                                 + point_num//4*piezo_horiz_shift
             roi_array[point_num, tweezer_num] = \
-                make_centered_roi(vert_center=tweezer_00_vert_center + tweezer_num * tweezer_vert_spacing \
-                                              + point_num//4*piezo_vert_shift,
-                                    horiz_center=tweezer_00_horiz_center + tweezer_num * tweezer_horiz_spacing \
-                                                 + point_num//4*piezo_horiz_shift,
+                make_centered_roi(vert_center=v_center,
+                                    horiz_center=h_center,
                                     vert_span=tweezer_vert_span,
                                     horiz_span=tweezer_horiz_span)
         new_counts_datafield = DataDictShotDataField(name=f'{frame_key}_tweezer-{tweezer_num:02d}_counts')
@@ -107,5 +110,5 @@ for datatool in datatool_list:
     datamodel.add_datatool(datatool, overwrite=True, quiet=True)
 datamodel.link_datatools()
 
-datamodel.run(handler_quiet=True,save_every_shot=False,save_point_data=False,save_before_reporting=False)
+# datamodel.run(handler_quiet=True,save_every_shot=False,save_point_data=False,save_before_reporting=False)
 
