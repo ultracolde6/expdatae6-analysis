@@ -110,5 +110,5 @@ for datatool in datatool_list:
     datamodel.add_datatool(datatool, overwrite=True, quiet=True)
 datamodel.link_datatools()
 
-# datamodel.run(handler_quiet=True,save_every_shot=False,save_point_data=False,save_before_reporting=False)
+datamodel.run(handler_quiet=True,save_every_shot=False,save_point_data=False,save_before_reporting=False)
 
