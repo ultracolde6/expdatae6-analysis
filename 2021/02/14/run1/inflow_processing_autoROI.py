@@ -66,8 +66,9 @@ for shot_num in range(num_shots):
         photo = np.array(hf.get('frame-' + str(frame_num).zfill(2)))
         frames_array[point, frame_num] += photo
     hf.close
+    print(shot_num)
 frames_array = frames_array / num_shots * num_points
-fit_frame_array = np.mean(frames_array[:,0:-2],axis=1) # averaging all frames; could also pick one, ie frames_array[:,n,:,:]
+fit_frame_array = np.mean(frames_array[:,0:-2,:,:],axis=1) # averaging all frames; could also pick one, ie frames_array[:,n,:,:]
 
 # Build ROI Guess Array
 tweezer_00_vert_center_init = 81.15# starting position of tweezer 0 = 108MHz
