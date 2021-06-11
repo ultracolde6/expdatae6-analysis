@@ -1,0 +1,28 @@
+S t a r k _ s h i f t _ p r e d i c t _ f u d g e d / G a m m a
+-1.1856800061788213,-2.3713600123576426,-3.5570400185364637,-4.742720024715285,-5.928400030894107
+"" "
+"
+S t a r k _ s h i f t _ m e a s u r e d _ a l l _ f r e q u e n c y _ a n a l y s i s
+-0.8650011115874765,-2.082638262986888,-3.6363880210885773,-5.348485195384604,-6.664230280180333
+"" "
+"
+E r r o r _ o f _ S t a r k _ s h i f t _ m e a s u r e d _ a l l _ f r e q u e n c y _ a n a l y s i s
+0.2443507092053731,0.2564180149673602,0.24547114972047387,0.30894384377326434,0.39588827088378004
+"" "
+"
+S t a r k _ s h i f t _ m e a s u r e d _ s i n g l e _ f r e q u e n c y _ a n a l y s i s ( m o l _ d e t u n i n g " " = " " - 9 . 5 5 $ \ G a m m a $ )
+-1.0079799860627503,-2.4411157656745903,-3.4181635647267807,-4.490449021482318,-6.163370349136455
+"" "
+"
+E r r o r _ o f _ S t a r k _ s h i f t _ m e a s u r e d _ s i n g l e _ f r e q u e n c y _ a n a l y s i s ( m o l _ d e t u n i n g " " = " " - 9 . 5 5 $ \ G a m m a $ )
+1.6164883365786036,1.2142536464485614,1.3877425609470944,0.8797274529160267,0.5787910908892531
+"" "
+"
+S t a r k _ s h i f t _ m e a s u r e d _ s i n g l e _ f r e q u e n c y _ a n a l y s i s ( m o l _ d e t u n i n g " " = " " - 1 . 6 5 $ \ G a m m a $ )
+-1.1229298925410776,-2.2496927348522116,nan,nan,nan
+"" "
+"
+E r r o r _ o f _ S t a r k _ s h i f t _ m e a s u r e d _ s i n g l e _ f r e q u e n c y _ a n a l y s i s ( m o l _ d e t u n i n g " " = " " - 1 . 6 5 $ \ G a m m a $ )
+0.3659916010225252,0.32091424781561106,nan,nan,nan
+"" "
+"

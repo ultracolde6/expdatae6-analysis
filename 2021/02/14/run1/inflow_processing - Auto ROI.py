@@ -94,6 +94,14 @@ tweezer_horiz_spacing_init = 1.3867*2
 # fig, axs = plt.subplots(num_points, num_tweezers ,figsize=(4*num_tweezers, 4*num_points))
 x_centerpos = np.zeros((num_tweezers,num_points))
 y_centerpos = np.zeros((num_tweezers,num_points))
+x_centerpos_frame = np.zeros((num_tweezers,len(pzt_para_list),len(mol_freq_list)))
+y_centerpos_frame = np.zeros((num_tweezers,len(pzt_para_list),len(mol_freq_list)))
+x_radius_frame = np.zeros((num_tweezers,len(pzt_para_list),len(mol_freq_list)))
+y_radius_frame = np.zeros((num_tweezers,len(pzt_para_list),len(mol_freq_list)))
+x_centerpos_4 = np.zeros((num_tweezers,len(pzt_para_list),len(probe_att_list),len(mol_freq_list)))
+y_centerpos_4 = np.zeros((num_tweezers,len(pzt_para_list),len(probe_att_list),len(mol_freq_list)))
+x_radius_4 = np.zeros((num_tweezers,len(pzt_para_list),len(probe_att_list),len(mol_freq_list)))
+y_radius_4 = np.zeros((num_tweezers,len(pzt_para_list),len(probe_att_list),len(mol_freq_list)))
 x_centerpos_3 = np.zeros((num_tweezers,len(pzt_para_list),len(probe_att_list)))
 y_centerpos_3 = np.zeros((num_tweezers,len(pzt_para_list),len(probe_att_list)))
 x_radius_3 = np.zeros((num_tweezers,len(pzt_para_list),len(probe_att_list)))
@@ -103,6 +111,7 @@ y_centerpos_2 = np.zeros((num_tweezers,len(pzt_para_list)))
 x_radius_2 = np.zeros((num_tweezers,len(pzt_para_list)))
 y_radius_2 = np.zeros((num_tweezers,len(pzt_para_list)))
 ROI_init_array = np.zeros((num_tweezers,len(pzt_para_list),len(probe_att_list), tweezer_vert_span_init, tweezer_horiz_span_init))
+ROI_array = np.zeros((num_tweezers,len(pzt_para_list),len(probe_att_list), len(mol_freq_list), tweezer_vert_span_init, tweezer_horiz_span_init))
 for point in range(num_points):
     # fig, axs = plt.subplots(1, num_frames ,figsize=(30, 10))
     # vmin = 110
@@ -118,8 +127,21 @@ for point in range(num_points):
         slice2d = tuple((slice(top, bottom, 1),  slice(left, right, 1)))
 
         ROI_init = np.zeros((tweezer_vert_span_init, tweezer_horiz_span_init))
-        for frame_num in range(num_frames):
+        for frame_num in range(num_frames-2):
             photo = frames_array[point, frame_num]
+            ROI_temp = photo[slice2d] - np.amin(photo[slice2d])
+            ROI_array[tweezer,pzt_counter,probe_att_counter,frame_num] = ROI_temp
+            fit_struct = e6fit.fit_gaussian2d(ROI_temp, show_plot=False)
+            x0, y0 = [fit_struct['x0']['val'], fit_struct['y0']['val']]
+            sx, sy = [fit_struct['sx']['val'], fit_struct['sy']['val']]
+            x_centerpos_4[tweezer, pzt_counter, probe_att_counter,frame_num] = tweezer_00_horiz_center_init + tweezer * tweezer_horiz_spacing_init + x0 - tweezer_horiz_span_init / 2
+            y_centerpos_4[tweezer, pzt_counter, probe_att_counter,frame_num] = tweezer_00_vert_center_init + tweezer * tweezer_vert_spacing_init + y0 - tweezer_vert_span_init / 2
+            x_radius_4[tweezer, pzt_counter, probe_att_counter,frame_num] = sx
+            y_radius_4[tweezer, pzt_counter, probe_att_counter,frame_num] = sy
+
+            print(f"tweezer{tweezer_freq_list[tweezer]}, pzt_counter={pzt_counter}, probe_counter={probe_att_counter}, mol_counter={frame_num}"
+                  f" - x0={x0:.03f},y0={y0:.03f},sx={sx:.03f},sy={sy:.03f}")
+
             ROI_init += photo[slice2d]
         ROI_init = ROI_init - np.amin(ROI_init)
         ROI_init_array[tweezer,pzt_counter,probe_att_counter] = ROI_init
@@ -137,10 +159,27 @@ for point in range(num_points):
         y_centerpos_3[tweezer,pzt_counter,probe_att_counter] = tweezer_00_vert_center_init + tweezer*tweezer_vert_spacing_init + y0 - tweezer_vert_span_init/2
         x_radius_3[tweezer,pzt_counter,probe_att_counter] = sx
         y_radius_3[tweezer,pzt_counter,probe_att_counter] = sy
-        # print([x0,y0,sx,sy])
+
+        print(
+            f"tweezer{tweezer_freq_list[tweezer]}, pzt_counter={pzt_counter}, probe_counter={probe_att_counter}"
+            f" - x0={x0:.03f},y0={y0:.03f},sx={sx:.03f},sy={sy:.03f}")
 # fig.savefig('tweezers_raw_data',dpi=300)
 for tweezer in range(num_tweezers):
     for pzt_counter in range(len(pzt_para_list)):
+        for mol_freq_counter in range(len(mol_freq_list)):
+            ROI_temp = np.mean(ROI_array[tweezer,pzt_counter,:,mol_freq_counter],axis=0)
+            fit_struct = e6fit.fit_gaussian2d(ROI_temp, show_plot=False)
+            x0, y0 = [fit_struct['x0']['val'], fit_struct['y0']['val']]
+            sx, sy = [fit_struct['sx']['val'], fit_struct['sy']['val']]
+            x_centerpos_frame[tweezer, pzt_counter, mol_freq_counter] = tweezer_00_horiz_center_init + tweezer * tweezer_horiz_spacing_init + x0 - tweezer_horiz_span_init / 2
+            y_centerpos_frame[tweezer, pzt_counter, mol_freq_counter] = tweezer_00_vert_center_init + tweezer * tweezer_vert_spacing_init + y0 - tweezer_vert_span_init / 2
+            x_radius_frame[tweezer, pzt_counter, mol_freq_counter] = sx
+            y_radius_frame[tweezer, pzt_counter, mol_freq_counter] = sy
+
+            print(f"tweezer{tweezer_freq_list[tweezer]}, pzt_counter={pzt_counter}, mol_counter={frame_num}"
+                  f" - x0={x0:.03f},y0={y0:.03f},sx={sx:.03f},sy={sy:.03f}")
+
+
         fit_struct = e6fit.fit_gaussian2d(np.mean(ROI_init_array[tweezer,pzt_counter,:],axis=0), show_plot=False)
         x0, y0 = [fit_struct['x0']['val'], fit_struct['y0']['val']]
         sx, sy = [fit_struct['sx']['val'], fit_struct['sy']['val']]
@@ -154,24 +193,56 @@ for tweezer in range(num_tweezers):
             y_centerpos[tweezer, pzt_counter*num_inner_loop+inner_counter] = tweezer_00_vert_center_init + tweezer * tweezer_vert_spacing_init + y0 - tweezer_vert_span_init / 2
 
 fig2,ax2 = plt.subplots(num_tweezers, 4 ,figsize=(20, 5*num_tweezers))
+fig3,ax3 = plt.subplots(num_tweezers, 4 ,figsize=(20, 5*num_tweezers))
+fig4,ax4 = plt.subplots(num_tweezers, 4 ,figsize=(20, 5*num_tweezers))
 for tweezer_num in range(num_tweezers):
     ax2[tweezer_num, 0].set_title(f"tweezer{tweezer_freq_list[tweezer_num]}, x_center")
     ax2[tweezer_num, 1].set_title(f"tweezer{tweezer_freq_list[tweezer_num]}, x_radius")
     ax2[tweezer_num, 2].set_title(f"tweezer{tweezer_freq_list[tweezer_num]}, y_center")
     ax2[tweezer_num, 3].set_title(f"tweezer{tweezer_freq_list[tweezer_num]}, y_radius")
+    ax3[tweezer_num, 0].set_title(f"tweezer{tweezer_freq_list[tweezer_num]}, x_center")
+    ax3[tweezer_num, 1].set_title(f"tweezer{tweezer_freq_list[tweezer_num]}, x_radius")
+    ax3[tweezer_num, 2].set_title(f"tweezer{tweezer_freq_list[tweezer_num]}, y_center")
+    ax3[tweezer_num, 3].set_title(f"tweezer{tweezer_freq_list[tweezer_num]}, y_radius")
+    ax4[tweezer_num, 0].set_title(f"tweezer{tweezer_freq_list[tweezer_num]}, x_center")
+    ax4[tweezer_num, 1].set_title(f"tweezer{tweezer_freq_list[tweezer_num]}, x_radius")
+    ax4[tweezer_num, 2].set_title(f"tweezer{tweezer_freq_list[tweezer_num]}, y_center")
+    ax4[tweezer_num, 3].set_title(f"tweezer{tweezer_freq_list[tweezer_num]}, y_radius")
+    for mol_freq_counter in range(len(mol_freq_list)):
+        ax3[tweezer_num, 0].plot(np.array(pzt_para_list), x_centerpos_frame[tweezer_num,:,mol_freq_counter],label = f"{mol_freq_list[mol_freq_counter]}")
+        ax3[tweezer_num, 1].plot(np.array(pzt_para_list), x_radius_frame[tweezer_num,:,mol_freq_counter],label = f"{mol_freq_list[mol_freq_counter]}")
+        ax3[tweezer_num, 2].plot(np.array(pzt_para_list), y_centerpos_frame[tweezer_num,:,mol_freq_counter],label = f"{mol_freq_list[mol_freq_counter]}")
+        ax3[tweezer_num, 3].plot(np.array(pzt_para_list), y_radius_frame[tweezer_num,:,mol_freq_counter],label = f"{mol_freq_list[mol_freq_counter]}")
     for probe_att_counter in range(len(probe_att_list)):
         ax2[tweezer_num, 0].plot(np.array(pzt_para_list), x_centerpos_3[tweezer_num,:,probe_att_counter],label = f"{probe_att_list[probe_att_counter]}")
         ax2[tweezer_num, 1].plot(np.array(pzt_para_list), x_radius_3[tweezer_num,:,probe_att_counter],label = f"{probe_att_list[probe_att_counter]}")
         ax2[tweezer_num, 2].plot(np.array(pzt_para_list), y_centerpos_3[tweezer_num,:,probe_att_counter],label = f"{probe_att_list[probe_att_counter]}")
         ax2[tweezer_num, 3].plot(np.array(pzt_para_list), y_radius_3[tweezer_num,:,probe_att_counter],label = f"{probe_att_list[probe_att_counter]}")
+        for mol_freq_counter in range(len(mol_freq_list)):
+            ax4[tweezer_num, 0].plot(np.array(pzt_para_list), x_centerpos_4[tweezer_num,:,probe_att_counter,mol_freq_counter],label = f"{probe_att_list[probe_att_counter]},mol_f={mol_freq_list[mol_freq_counter]}")
+            ax4[tweezer_num, 1].plot(np.array(pzt_para_list), x_radius_4[tweezer_num,:,probe_att_counter,mol_freq_counter],label = f"{probe_att_list[probe_att_counter]},mol_f={mol_freq_list[mol_freq_counter]}")
+            ax4[tweezer_num, 2].plot(np.array(pzt_para_list), y_centerpos_4[tweezer_num,:,probe_att_counter,mol_freq_counter],label = f"{probe_att_list[probe_att_counter]},mol_f={mol_freq_list[mol_freq_counter]}")
+            ax4[tweezer_num, 3].plot(np.array(pzt_para_list), y_radius_4[tweezer_num,:,probe_att_counter,mol_freq_counter],label = f"{probe_att_list[probe_att_counter]},mol_f={mol_freq_list[mol_freq_counter]}")
 
     ax2[tweezer_num, 0].plot(np.array(pzt_para_list), x_centerpos_2[tweezer_num, :],  label=f"sum", c='black')
     ax2[tweezer_num, 1].plot(np.array(pzt_para_list), x_radius_2[tweezer_num, :],  label=f"sum", c='black')
     ax2[tweezer_num, 2].plot(np.array(pzt_para_list), y_centerpos_2[tweezer_num, :],  label=f"sum", c='black')
     ax2[tweezer_num, 3].plot(np.array(pzt_para_list), y_radius_2[tweezer_num, :],  label=f"sum", c='black')
     ax2[tweezer_num, 3].legend(title='probe intensity', bbox_to_anchor=(1.35, 1), loc='upper right')
+    ax3[tweezer_num, 0].plot(np.array(pzt_para_list), x_centerpos_2[tweezer_num, :],  label=f"sum", c='black')
+    ax3[tweezer_num, 1].plot(np.array(pzt_para_list), x_radius_2[tweezer_num, :],  label=f"sum", c='black')
+    ax3[tweezer_num, 2].plot(np.array(pzt_para_list), y_centerpos_2[tweezer_num, :],  label=f"sum", c='black')
+    ax3[tweezer_num, 3].plot(np.array(pzt_para_list), y_radius_2[tweezer_num, :],  label=f"sum", c='black')
+    ax3[tweezer_num, 3].legend(title='mol_frequency', bbox_to_anchor=(1.35, 1), loc='upper right')
+    ax4[tweezer_num, 0].plot(np.array(pzt_para_list), x_centerpos_2[tweezer_num, :],  label=f"sum", c='black')
+    ax4[tweezer_num, 1].plot(np.array(pzt_para_list), x_radius_2[tweezer_num, :],  label=f"sum", c='black')
+    ax4[tweezer_num, 2].plot(np.array(pzt_para_list), y_centerpos_2[tweezer_num, :],  label=f"sum", c='black')
+    ax4[tweezer_num, 3].plot(np.array(pzt_para_list), y_radius_2[tweezer_num, :],  label=f"sum", c='black')
+    ax4[tweezer_num, 3].legend(title='probe intensity', bbox_to_anchor=(1.35, 1), loc='upper right')
 
-fig2.savefig('tweezers_postition_data',dpi=300)
+fig2.savefig('tweezers_postition_data_vs_probe_att',dpi=300)
+fig3.savefig('tweezers_postition_data_vs_mol_freq',dpi=300)
+fig4.savefig('tweezers_postition_data_vs_all',dpi=300)
 
 
 ################################################################################################

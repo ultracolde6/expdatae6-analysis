@@ -4,3 +4,8 @@ Open Jupyter Notebook.lnk
 *.idea/
 *reporters/
 *Thumbs.db
+
+*.pkl
+*.h5
+*.p
+*.stackdump

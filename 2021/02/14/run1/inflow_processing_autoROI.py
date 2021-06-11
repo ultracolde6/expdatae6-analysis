@@ -20,7 +20,8 @@ plt.close()
 
 data_root = Path('Y:/', 'expdata-e6/data')
 daily_subpath = Path(*Path.cwd().parent.parts[-3:])
-daily_path = Path(Path.cwd().parent)
+daily_path = Path(data_root, daily_subpath)
+# daily_path = Path(Path.cwd().parent)
 
 run_name = 'run1'
 mol_freq_list = [4.5,5,5.5,6,6.5,7,7.5,8]
@@ -57,7 +58,7 @@ high_na_datastream = DataStream(name='high NA Imaging', daily_path=daily_path, r
 # Load Data for Auto ROI
 data_path = daily_path / 'data' / run_name / 'High NA Imaging'
 frames_array = np.zeros([num_points, num_frames, 350, 50])
-num_shots = 1000
+num_shots = 8000
 for shot_num in range(num_shots):
     file_name = 'jkam_capture_' + str(shot_num).zfill(5) + '.h5'
     hf = h5py.File(data_path / file_name, 'r')
@@ -66,14 +67,17 @@ for shot_num in range(num_shots):
         photo = np.array(hf.get('frame-' + str(frame_num).zfill(2)))
         frames_array[point, frame_num] += photo
     hf.close
+
+    # print(shot_num)
 frames_array = frames_array / num_shots * num_points
-fit_frame_array = np.mean(frames_array[:,0:-2],axis=1) # averaging all frames; could also pick one, ie frames_array[:,n,:,:]
+fit_frame_array = np.mean(frames_array[:,2:-2,:,:],axis=1) # averaging all frames; could also pick one, ie frames_array[:,n,:,:]
+
 
 # Build ROI Guess Array
 tweezer_00_vert_center_init = 81.15# starting position of tweezer 0 = 108MHz
 tweezer_00_horiz_center_init = 21.2
 tweezer_horiz_span_init = 20
-tweezer_vert_span_init = 20
+tweezer_vert_span_init = 14
 tweezer_vert_spacing_init = 27.8*2 #2 is freq diff between neighboring tweezers on this run
 tweezer_horiz_spacing_init = 1.3867*2
 roi_guess_array = np.zeros([num_points, num_tweezers], dtype=object)
